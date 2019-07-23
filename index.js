@@ -42,4 +42,45 @@ app.get('/', (request, response) => {
     });
 });
 
+
+app.get('/add', (request, response) => {
+
+    const queryString =  `INSERT INTO students (name, phone, email) VALUES ('yo', 'bro', 'pokemon')`;
+
+    pool.query(queryString, (err, result) =>  {
+
+        const queryString = 'SELECT * FROM students';
+
+        pool.query(queryString, (err, result) => {
+
+            if (err) {
+                console.error('query error:', err.stack);
+                response.send( 'query error' );
+            } else {
+                console.log('query result:', result);
+                // redirect to home page
+                response.send( result.rows );
+                //response.redirect('/');
+            }
+        });
+    });
+});
+
+
+
 const server = app.listen(3000, () => console.log('~~~ Tuning in to the waves of port 3000 ~~~'));
+
+let onClose = function(){
+
+  console.log("closing");
+
+  server.close(() => {
+
+    console.log('Process terminated');
+
+    pool.end( () => console.log('Shut down db connection pool'));
+  })
+};
+
+process.on('SIGTERM', onClose);
+process.on('SIGINT', onClose);
